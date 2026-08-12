@@ -5,11 +5,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    strictPort: true,
+    strictPort: false, // Allow fallback port if 5173 is busy
     proxy: {
       '/api': {
-        target: 'http://localhost:8081',
-        changeOrigin: true
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:8081',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       }
     }
   },
@@ -21,7 +22,7 @@ export default defineConfig({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Remove console logs in production
+        drop_console: process.env.VITE_ENABLE_CONSOLE_LOGS === 'true' ? false : true,
       },
     },
     // Split vendor code for better caching
